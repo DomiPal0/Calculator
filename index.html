@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Tiempo entre oleadas de defensores</title>
+    <style>
+        :root {
+            --bg-color: #0f1319;
+            --container-bg: rgba(30, 41, 59, 0.93);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #475569;
+            --input-bg: #090d16;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
+            --danger-color: #f87171;
+            --safe-color: #4ade80;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            backdrop-filter: blur(8px);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            max-width: 650px;
+            width: 100%;
+            position: relative;
+        }
+
+        .lang-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .lang-switcher:hover {
+            border-color: var(--accent-color);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-main);
+            margin-top: 10px;
+            margin-bottom: 25px;
+            font-size: 22px;
+            line-height: 1.4;
+            padding-right: 60px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        input[type="number"] {
+            padding: 12px;
+            background-color: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--accent-color);
+        }
+
+        .result-badge {
+            background-color: rgba(56, 189, 248, 0.15);
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: rgba(15, 23, 42, 0.6);
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+
+        .time-value {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .alert-danger {
+            color: var(--danger-color) !important;
+        }
+
+        .alert-safe {
+            color: var(--safe-color) !important;
+        }
+
+        /* Estilos sutiles para el canal de YouTube */
+        .footer-channel {
+            text-align: center;
+            border-top: 1px solid rgba(71, 85, 105, 0.4);
+            padding-top: 15px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .footer-channel a {
+            color: #FFFCA8; /* Color personalizado solicitado para resaltar */
+            text-decoration: none;
+            font-weight: 700;
+            margin-left: 4px;
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+
+        .footer-channel a:hover {
+            color: var(--accent-color);
+            text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button class="lang-switcher" id="langBtn" onclick="toggleLanguage()">EN</button>
+    
+    <h1 id="mainTitle">Calculadora de Tiempo entre oleadas de defensores</h1>
+    
+    <div class="input-row">
+        <div class="input-group">
+            <label id="lblInputOff" for="valOff">Línea de Ataque (%):</label>
+            <input type="number" id="valOff" value="350" oninput="calcularTiempos()">
+        </div>
+        <div class="input-group">
+            <label id="lblInputDef" for="valDef">Línea de Defensa (%):</label>
+            <input type="number" id="valDef" value="-203" oninput="ajustarNegativoYCalcular()">
+        </div>
+    </div>
+
+    <div id="badgeDiff" class="result-badge">Diferencia Total Calculada: 147%</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th id="thBuilding">Edificio Defensivo</th>
+                <th id="thWave1">Primera Oleada</th>
+                <th id="thWave2">Otras Oleadas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong id="lblHangar">Hangar</strong></td>
+                <td id="hangar-1" class="time-value">--:--</td>
+                <td id="hangar-2" class="time-value">--:--</td>
+            </tr>
+            <tr>
+                <td><strong id="lblGarrison">Guarnición</strong></td>
+                <td id="guarnicion-1" class="time-value">--:--</td>
+                <td id="guarnicion-2" class="time-value">--:--</td>
+            </tr>
+            <tr>
+                <td><strong id="lblBunker">Búnker</strong></td>
+                <td id="bunker-1" class="time-value">--:--</td>
+                <td id="bunker-2" class="time-value">--:--</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Sección inferior con el link a tu canal de YouTube -->
+    <div class="footer-channel" id="footerText">
+        Contenido de ataques en YouTube: <a href="https://www.youtube.com/channel/UCLMvw_8sSG1I_gT-WwDpD9Q" target="_blank">DomiNations PAL0</a>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'es';
+
+    function toggleLanguage() {
+        if (currentLang === 'es') {
+            currentLang = 'en';
+            document.getElementById('langBtn').innerText = 'ES';
+            document.getElementById('mainTitle').innerText = "Defender Spawn Wave Timer Calculator";
+            document.getElementById('lblInputOff').innerText = "Offensive Line (%):";
+            document.getElementById('lblInputDef').innerText = "Defensive Line (%):";
+            document.getElementById('thBuilding').innerText = "Defensive Building";
+            document.getElementById('thWave1').innerText = "First Wave";
+            document.getElementById('thWave2').innerText = "Other Waves";
+            document.getElementById('lblHangar').innerText = "Hangar";
+            document.getElementById('lblGarrison').innerText = "Garrison";
+            document.getElementById('lblBunker').innerText = "Bunker";
+            document.getElementById('footerText').innerHTML = 'Attack content on YouTube: <a href="https://www.youtube.com/channel/UCLMvw_8sSG1I_gT-WwDpD9Q" target="_blank">DomiNations PAL0</a>';
+        } else {
+            currentLang = 'es';
+            document.getElementById('langBtn').innerText = 'EN';
+            document.getElementById('mainTitle').innerText = "Calculadora de Tiempo entre oleadas de defensores";
+            document.getElementById('lblInputOff').innerText = "Línea de Ataque (%):";
+            document.getElementById('lblInputDef').innerText = "Línea de Defensa (%):";
+            document.getElementById('thBuilding').innerText = "Edificio Defensivo";
+            document.getElementById('thWave1').innerText = "Primera Oleada";
+            document.getElementById('thWave2').innerText = "Otras Oleadas";
+            document.getElementById('lblHangar').innerText = "Hangar";
+            document.getElementById('lblGarrison').innerText = "Guarnición";
+            document.getElementById('lblBunker').innerText = "Búnker";
+            document.getElementById('footerText').innerHTML = 'Contenido de ataques en YouTube: <a href="https://www.youtube.com/channel/UCLMvw_8sSG1I_gT-WwDpD9Q" target="_blank">DomiNations PAL0</a>';
+        }
+        calcularTiempos();
+    }
+
+    function helperFormato(segundosTotales) {
+        let s = segundosTotales < 0 ? 0 : segundosTotales;
+        let m = Math.floor(s / 60);
+        let seg = Math.round(s % 60);
+        if (seg === 60) { m += 1; seg = 0; }
+        return (m < 10 ? '0' + m : m) + ':' + (seg < 10 ? '0' + seg : seg);
+    }
+
+    function ajustarNegativoYCalcular() {
+        let inputDef = document.getElementById('valDef');
+        let val = parseFloat(inputDef.value);
+        
+        if (!isNaN(val) && val > 0) {
+            inputDef.value = -val;
+        }
+        calcularTiempos();
+    }
+
+    function calcularTiempos() {
+        let off = parseFloat(document.getElementById('valOff').value);
+        let def = parseFloat(document.getElementById('valDef').value);
+        
+	if (isNaN(off) || isNaN(def)) {
+	return;
+  }
+	if (def > 0) {
+	def = -def;
+  }
+	let X = off + def;
+	if (currentLang === 'es') {
+	document.getElementById('badgeDiff').innerText = "Diferencia Total Calculada: " + X + "%";
+	} else {
+	document.getElementById('badgeDiff').innerText = "Total Calculated Difference: " + X + "%";
+  }
+	let h1 = (0.0002366 * X * X) - (0.0007690 * X) + 2;
+	let h2 = (0.0002314 * X * X) + (0.0884291 * X) + 10;
+	let g2 = (0.0001723 * X * X) + (0.1719547 * X) + 10;
+	let b1 = (0.0001427 * X * X) + (0.0470509 * X) + 2;
+	let b2 = (0.0000114 * X * X) + (0.6037641 * X) + 10;
+	document.getElementById('hangar-1').innerText = helperFormato(h1);
+	document.getElementById('hangar-1').className = "time-value " + (h1 > 210 ? "alert-danger" : "alert-safe");
+	document.getElementById('hangar-2').innerText = helperFormato(h2);
+	document.getElementById('hangar-2').className = "time-value " + (h2 > 210 ? "alert-danger" : "alert-safe");
+	document.getElementById('guarnicion-1').innerText = helperFormato(h1);
+	document.getElementById('guarnicion-1').className = "time-value " + (h1 > 210 ? "alert-danger" : "alert-safe");
+	document.getElementById('guarnicion-2').innerText = helperFormato(g2);
+	document.getElementById('guarnicion-2').className = "time-value " + (g2 > 210 ? "alert-danger" : "alert-safe");
+	document.getElementById('bunker-1').innerText = helperFormato(b1);
+	document.getElementById('bunker-1').className = "time-value " + (b1 > 210 ? "alert-danger" : "alert-safe");
+	document.getElementById('bunker-2').innerText = helperFormato(b2);
+	document.getElementById('bunker-2').className = "time-value " + (b2 > 210 ? "alert-danger" : "alert-safe");
+  }
+	window.addEventListener('DOMContentLoaded', calcularTiempos);
+</script>
+
+</body>
+</html>
