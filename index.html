@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora EDST - Simulador de Despliegue Táctico</title>
+<style>
+  :root {
+    --bg-main: #0b0f17;
+    --bg-panel: #131a26;
+    --bg-card: #182130;
+    --bg-input: #0e141f;
+    --border: #263347;
+    --text-main: #e6edf7;
+    --text-muted: #8b9bb4;
+    --accent: #38bdf8;
+    --accent-hover: #0ea5e9;
+    --green: #10b981;
+    --green-bg: rgba(16, 185, 129, 0.14);
+    --amber: #f59e0b;
+    --amber-bg: rgba(245, 158, 11, 0.14);
+    --red: #ef4444;
+    --red-bg: rgba(239, 68, 68, 0.15);
+    --purple: #a855f7;
+    --purple-bg: rgba(168, 85, 247, 0.15);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.5;
+    padding: 20px;
+  }
+
+  .mono {
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .container {
+    max-width: 1360px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-bottom: 20px;
+  }
+
+  .header-title h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .badge-version {
+    font-size: 0.72rem;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+
+  .header-title p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  button {
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    padding: 8px 13px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  button:hover {
+    border-color: var(--accent);
+    background: #1e293b;
+  }
+
+  button.primary {
+    background: rgba(56, 189, 248, 0.16);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  button.primary:hover {
+    background: rgba(56, 189, 248, 0.25);
+  }
+
+  /* Main Grid */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 370px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 980px) {
+    .main-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Left Panel */
+  .panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .section-block {
+    margin-bottom: 22px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-block:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .section-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .control-group {
+    margin-bottom: 14px;
+  }
+
+  .control-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 0.88rem;
+  }
+
+  .num-input-wrap {
+    display: flex;
+    align-items: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 8px;
+  }
+
+  .num-input-wrap input[type="number"] {
+    width: 64px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-align: right;
+    outline: none;
+  }
+
+  .num-input-wrap span {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-left: 3px;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .helper-note {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: rgba(14, 20, 31, 0.7);
+    border-left: 3px solid var(--purple);
+    padding: 8px 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+
+  /* Radio Zone Buttons */
+  .zone-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .zone-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .zone-option:hover {
+    border-color: #475569;
+  }
+
+  .zone-option.active {
+    border-color: var(--purple);
+    background: var(--purple-bg);
+  }
+
+  .zone-option-label {
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .zone-option-sub {
+    font-size: 0.73rem;
+    color: var(--text-muted);
+    display: block;
+  }
+
+  .zone-badge {
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .zone-option.active .zone-badge {
+    background: var(--purple);
+    color: #fff;
+  }
+
+  /* Municiones */
+  .ammo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .ammo-box label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  select {
+    width: 100%;
+    background: var(--bg-input);
+    color: #fff;
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    border-radius: 7px;
+    font-size: 0.84rem;
+    outline: none;
+    cursor: pointer;
+  }
+
+  select:focus {
+    border-color: var(--accent);
+  }
+
+  /* Right Panel */
+  .summary-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  @media (max-width: 600px) {
+    .summary-bar {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .stat-pill {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+
+  .stat-pill .label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-pill .val {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 2px;
+    color: #fff;
+  }
+
+  /* Structure Cards Grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 720px) {
+    .cards-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .struct-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: border-color 0.2s ease;
+  }
+
+  .struct-card:hover {
+    border-color: #3b4d6b;
+  }
+
+  .struct-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .struct-name {
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .struct-meta {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+  }
+
+  .neto-chip {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.14);
+    color: var(--accent);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    white-space: nowrap;
+  }
+
+  .card-zone-select {
+    background: var(--bg-input);
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .card-zone-select label {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .waves-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .wave-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 12px;
+  }
+
+  .wave-title {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .wave-time {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
+  .wave-sec {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  .tag-cap {
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+  }
+
+  .tag-warn {
+    background: var(--amber-bg);
+    color: var(--amber);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+  }
+
+  .tag-danger {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+  }
+
+  .battle-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+  }
+
+  /* Optional Wave Estimator & Timeline */
+  .extra-panel {
+    margin-top: 18px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+
+  .extra-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .timeline-container {
+    margin-top: 16px;
+    display: none;
+  }
+
+  .timeline-container.visible {
+    display: block;
+  }
+
+  .timeline-row {
+    margin-bottom: 12px;
+  }
+
+  .timeline-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+  }
+
+  .timeline-track {
+    position: relative;
+    height: 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    top: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transform: translateX(-50%);
+  }
+
+  .dot-w1 { background: var(--green); }
+  .dot-w2 { background: var(--accent); }
+
+  /* Comparator Table */
+  .comp-section {
+    margin-top: 18px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin-top: 12px;
+  }
+
+  th, td {
+    padding: 9px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="header-title">
+      <h1>Calculadora EDST <span class="badge-version">30 FPS Engine</span></h1>
+      <p>Simulador de tiempos de despliegue defensivo · 1ª Oleada y 2ª+ Oleada (Combate 03:30,00)</p>
+    </div>
+    <div class="presets">
+      <button onclick="applyPreset(0, 0, 0, 0, 0)">Base 0% vs 0%</button>
+      <button onclick="applyPreset(200, -100, 0, 0, 0)">Test -100% / 200%</button>
+      <button class="primary" onclick="applyPreset(200, -100, -42, 4, 3)">Full Sinergia (-42% | -7s)</button>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <!-- PANEL IZQUIERDO: CONTROLES -->
+    <aside class="panel">
+      <div class="section-block">
+        <div class="section-title">1. Estadísticas de Combate</div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <label for="ofensivaInput">Ofensiva del Atacante</label>
+            <div class="num-input-wrap">
+              <input type="number" id="ofensivaInput" class="mono" value="200" min="0" max="800" step="5" oninput="syncStats('ofensiva', this.value)">
+              <span>%</span>
+            </div>
+          </div>
+          <input type="range" id="ofensivaRange" value="200" min="0" max="600" step="5" oninput="syncStats('ofensiva', this.value)">
+        </div>
+
+        <div class="control-group" style="margin-bottom:0;">
+          <div class="control-header">
+            <label for="defensaInput">Defensa Base del Defensor</label>
+            <div class="num-input-wrap">
+              <input type="number" id="defensaInput" class="mono" value="-100" min="-400" max="200" step="5" oninput="syncStats('defensa', this.value)">
+              <span>%</span>
+            </div>
+          </div>
+          <input type="range" id="defensaRange" value="-100" min="-300" max="100" step="5" oninput="syncStats('defensa', this.value)">
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">
+          <span>2. Zona de Maravilla (Global)</span>
+        </div>
+        <div class="helper-note">
+          Aplica solo a edificios dentro del área de efecto. <strong>Boudica (-20%)</strong> se acumula aditivamente sobre la <strong>Acrópolis (-22%)</strong> hasta un total de <strong>-42%</strong>.
+        </div>
+
+        <div class="zone-list" id="globalZoneList">
+          <div class="zone-option" data-val="0" onclick="setGlobalZone(0)">
+            <div>
+              <span class="zone-option-label">Fuera de rango</span>
+              <span class="zone-option-sub">Sin cobertura de maravilla</span>
+            </div>
+            <span class="zone-badge mono">0%</span>
+          </div>
+          <div class="zone-option" data-val="-20" onclick="setGlobalZone(-20)">
+            <div>
+              <span class="zone-option-label">Maravilla general + Boudica</span>
+              <span class="zone-option-sub">Solo bono de consejera</span>
+            </div>
+            <span class="zone-badge mono">-20%</span>
+          </div>
+          <div class="zone-option" data-val="-22" onclick="setGlobalZone(-22)">
+            <div>
+              <span class="zone-option-label">Solo Acrópolis</span>
+              <span class="zone-option-sub">Sin Boudica asignada</span>
+            </div>
+            <span class="zone-badge mono">-22%</span>
+          </div>
+          <div class="zone-option active" data-val="-42" onclick="setGlobalZone(-42)">
+            <div>
+              <span class="zone-option-label">Acrópolis + Boudica</span>
+              <span class="zone-option-sub">Sinergia acumulada (-22% + -20%)</span>
+            </div>
+            <span class="zone-badge mono">-42%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">3. Municiones Equipadas</div>
+        <div class="ammo-grid">
+          <div class="ammo-box">
+            <label for="ammo1">Munición 1</label>
+            <select id="ammo1" class="mono" onchange="recalculate()">
+              <option value="0">Sin equipar (0 s)</option>
+              <option value="3">Nivel intermedio (-3 s)</option>
+              <option value="4" selected>Nivel máximo (-4 s)</option>
+            </select>
+          </div>
+          <div class="ammo-box">
+            <label for="ammo2">Munición 2</label>
+            <select id="ammo2" class="mono" onchange="recalculate()">
+              <option value="0">Sin equipar (0 s)</option>
+              <option value="3" selected>Nivel máximo (-3 s)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PANEL DERECHO: RESULTADOS -->
+    <main>
+      <div class="summary-bar">
+        <div class="stat-pill">
+          <div class="label">Cruce Base (Sin Maravilla)</div>
+          <div class="val mono" id="sumBaseNeto">+100%</div>
+        </div>
+        <div class="stat-pill">
+          <div class="label">Deducción Municiones</div>
+          <div class="val mono" id="sumAmmo" style="color: var(--green);">-7,00 s</div>
+        </div>
+        <div class="stat-pill">
+          <div class="label">Duración Máx. Combate</div>
+          <div class="val mono">03:30,00 <span style="font-size:0.75rem; color:var(--text-muted);">(210s)</span></div>
+        </div>
+      </div>
+
+      <div class="cards-grid" id="cardsContainer"></div>
+
+      <!-- ESTIMADOR OPCIONAL DE OLEADAS -->
+      <div class="extra-panel">
+        <div class="extra-header">
+          <label class="toggle-label">
+            <input type="checkbox" id="toggleTimeline" onchange="toggleEstimator()">
+            Mostrar estimador de oleadas totales y línea de tiempo (0:00 → 3:30)
+          </label>
+          <button class="primary" onclick="saveScenario()">+ Guardar escenario para comparar</button>
+        </div>
+
+        <div class="timeline-container" id="timelineContainer">
+          <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">
+            Puntos verdes = 1ª Oleada (T₁) · Puntos azules = Oleadas siguientes cada T₂ segundos hasta el minuto 3:30,00.
+          </p>
+          <div id="timelineBars"></div>
+        </div>
+      </div>
+
+      <!-- COMPARADOR DE ESCENARIOS -->
+      <div class="comp-section" id="compSection" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="section-title" style="margin:0;">Comparador de Escenarios Guardados</span>
+          <button onclick="clearScenarios()" style="padding:4px 10px; font-size:0.75rem;">Limpiar tabla</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Escenario</th>
+              <th>Ofe / Def</th>
+              <th>Mun.</th>
+              <th>Hangar (T₁ / T₂)</th>
+              <th>Guarnición (T₁ / T₂)</th>
+              <th>Arsenal (T₁ / T₂)</th>
+              <th>Bunker (T₁ / T₂)</th>
+            </tr>
+          </thead>
+          <tbody id="compBody" class="mono"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  const STRUCTURES = [
+    { id: 'hangar', name: 'Hangar', base1: 1.86, inc1: 10.00, base2: 12.62, inc2: 19.00, zone: -42 },
+    { id: 'guarnicion', name: 'Guarnición', base1: 2.12, inc1: 10.00, base2: 16.78, inc2: 25.00, zone: -42 },
+    { id: 'arsenal', name: 'Arsenal Cohete', base1: 3.00, inc1: 3.00, base2: 14.87, inc2: 18.00, zone: -42 },
+    { id: 'bunker', name: 'Bunker', base1: 6.92, inc1: 10.00, base2: 40.25, inc2: 60.00, zone: -42 }
+  ];
+
+  let savedScenarios = [];
+
+  function formatClock(sec) {
+    const mins = Math.floor(sec / 60);
+    const rem = sec % 60;
+    const wholeSec = Math.floor(rem);
+    const centis = Math.round((rem - wholeSec) * 100);
+    let finalSec = wholeSec;
+    let finalMin = mins;
+    let finalCentis = centis;
+    if (finalCentis === 100) {
+      finalCentis = 0;
+      finalSec += 1;
+    }
+    if (finalSec === 60) {
+      finalSec = 0;
+      finalMin += 1;
+    }
+    return `${finalMin}:${String(finalSec).padStart(2, '0')},${String(finalCentis).padStart(2, '0')}`;
+  }
+
+  function formatDecimal(sec) {
+    return sec.toFixed(2).replace('.', ',') + ' s';
+  }
+
+  function syncStats(type, val) {
+    const num = parseFloat(val) || 0;
+    if (type === 'ofensiva') {
+      document.getElementById('ofensivaInput').value = num;
+      document.getElementById('ofensivaRange').value = num;
+    } else {
+      document.getElementById('defensaInput').value = num;
+      document.getElementById('defensaRange').value = num;
+    }
+    recalculate();
+  }
+
+  function setGlobalZone(zoneVal) {
+    document.querySelectorAll('#globalZoneList .zone-option').forEach(el => {
+      el.classList.toggle('active', parseInt(el.dataset.val) === zoneVal);
+    });
+    STRUCTURES.forEach(s => s.zone = zoneVal);
+    recalculate();
+  }
+
+  function setCardZone(structId, zoneVal) {
+    const target = STRUCTURES.find(s => s.id === structId);
+    if (target) target.zone = parseInt(zoneVal);
+    // Actualizar estado visual de botones globales si todos coinciden
+    const allSame = STRUCTURES.every(s => s.zone === STRUCTURES[0].zone);
+    document.querySelectorAll('#globalZoneList .zone-option').forEach(el => {
+      el.classList.toggle('active', allSame && parseInt(el.dataset.val) === STRUCTURES[0].zone);
+    });
+    recalculate();
+  }
+
+  function applyPreset(ofe, def, zone, a1, a2) {
+    syncStats('ofensiva', ofe);
+    syncStats('defensa', def);
+    document.getElementById('ammo1').value = a1;
+    document.getElementById('ammo2').value = a2;
+    setGlobalZone(zone);
+  }
+
+  function computeStructure(s, ofe, def, ammoDeduction) {
+    const defTotal = def + s.zone;
+    const netoPct = ofe + defTotal;
+    const netoDec = netoPct / 100;
+
+    const raw1 = s.base1 + (s.inc1 * netoDec) - ammoDeduction;
+    const t1 = Math.max(2.00, raw1);
+    const cap1 = raw1 <= 2.00;
+
+    const raw2 = s.base2 + (s.inc2 * netoDec) - ammoDeduction;
+    const t2 = Math.max(10.00, raw2);
+    const cap2 = raw2 <= 10.00;
+
+    const secondWaveClock = t1 + t2;
+    const totalWaves = t1 > 210 ? 0 : 1 + Math.floor((210 - t1) / t2);
+
+    return { defTotal, netoPct, t1, cap1, t2, cap2, secondWaveClock, totalWaves };
+  }
+
+  function recalculate() {
+    const ofe = parseFloat(document.getElementById('ofensivaInput').value) || 0;
+    const def = parseFloat(document.getElementById('defensaInput').value) || 0;
+    const a1 = parseFloat(document.getElementById('ammo1').value) || 0;
+    const a2 = parseFloat(document.getElementById('ammo2').value) || 0;
+    const ammoDeduction = a1 + a2;
+
+    const baseNeto = ofe + def;
+    document.getElementById('sumBaseNeto').textContent = (baseNeto >= 0 ? '+' : '') + baseNeto + '%';
+    document.getElementById('sumAmmo').textContent = `-${ammoDeduction.toFixed(2).replace('.', ',')} s`;
+
+    const container = document.getElementById('cardsContainer');
+    const timelineBars = document.getElementById('timelineBars');
+    container.innerHTML = '';
+    timelineBars.innerHTML = '';
+
+    STRUCTURES.forEach(s => {
+      const res = computeStructure(s, ofe, def, ammoDeduction);
+      const netoStr = (res.netoPct >= 0 ? '+' : '') + res.netoPct + '%';
+
+      let statusHtml = '';
+      if (res.t1 > 210) {
+        statusHtml = `<span class="tag tag-danger">No despliega en 3:30</span>`;
+      } else if (res.secondWaveClock > 210) {
+        statusHtml = `<span class="tag tag-warn">2ª oleada supera 3:30 (${formatClock(res.secondWaveClock)})</span>`;
+      } else {
+        statusHtml = `<span style="color:var(--green); font-weight:600;" class="mono">2ª sale a las ${formatClock(res.secondWaveClock)}</span>`;
+      }
+
+      const card = document.createElement('div');
+      card.className = 'struct-card';
+      card.innerHTML = `
+        <div class="struct-header">
+          <div>
+            <div class="struct-name">${s.name}</div>
+            <div class="struct-meta">Base T₁: ${formatDecimal(s.base1)} (+${s.inc1}s) · Base T₂: ${formatDecimal(s.base2)} (+${s.inc2}s)</div>
+          </div>
+          <span class="neto-chip mono">Neto: ${netoStr}</span>
+        </div>
+
+        <div class="card-zone-select">
+          <label>Ubicación del edificio (Cobertura)</label>
+          <select onchange="setCardZone('${s.id}', this.value)">
+            <option value="0" ${s.zone === 0 ? 'selected' : ''}>Fuera de rango (0%)</option>
+            <option value="-20" ${s.zone === -20 ? 'selected' : ''}>Maravilla general + Boudica (-20%)</option>
+            <option value="-22" ${s.zone === -22 ? 'selected' : ''}>Solo Acrópolis sin Boudica (-22%)</option>
+            <option value="-42" ${s.zone === -42 ? 'selected' : ''}>Acrópolis + Boudica (-42%)</option>
+          </select>
+        </div>
+
+        <div class="waves-row">
+          <div class="wave-box">
+            <div class="wave-title">
+              <span>1ª Oleada (T₁)</span>
+              ${res.cap1 ? '<span class="tag tag-cap">CAP 2s</span>' : ''}
+            </div>
+            <div class="wave-time mono">${formatClock(res.t1)}</div>
+            <div class="wave-sec mono">${formatDecimal(res.t1)}</div>
+          </div>
+
+          <div class="wave-box">
+            <div class="wave-title">
+              <span>2ª+ Oleada (T₂)</span>
+              ${res.cap2 ? '<span class="tag tag-cap">CAP 10s</span>' : ''}
+            </div>
+            <div class="wave-time mono">${formatClock(res.t2)}</div>
+            <div class="wave-sec mono">${formatDecimal(res.t2)}</div>
+          </div>
+        </div>
+
+        <div class="battle-footer">
+          <span style="color:var(--text-muted);">Reloj de batalla:</span>
+          ${statusHtml}
+        </div>
+      `;
+      container.appendChild(card);
+
+      // Timeline bar
+      let dotsHtml = '';
+      if (res.t1 <= 210) {
+        const pct1 = (res.t1 / 210) * 100;
+        dotsHtml += `<div class="timeline-dot dot-w1" style="left:${pct1}%" title="Oleada 1: ${formatClock(res.t1)}"></div>`;
+        let nextTime = res.t1 + res.t2;
+        let waveIdx = 2;
+        while (nextTime <= 210 && waveIdx <= 25) {
+          const pctN = (nextTime / 210) * 100;
+          dotsHtml += `<div class="timeline-dot dot-w2" style="left:${pctN}%" title="Oleada ${waveIdx}: ${formatClock(nextTime)}"></div>`;
+          nextTime += res.t2;
+          waveIdx++;
+        }
+      }
+
+      const tRow = document.createElement('div');
+      tRow.className = 'timeline-row';
+      tRow.innerHTML = `
+        <div class="timeline-info">
+          <span><strong>${s.name}</strong> <span style="color:var(--text-muted);">(${netoStr} neto)</span></span>
+          <span class="mono" style="color:var(--accent);">${res.totalWaves} oleadas en 3:30</span>
+        </div>
+        <div class="timeline-track">${dotsHtml}</div>
+      `;
+      timelineBars.appendChild(tRow);
+    });
+  }
+
+  function toggleEstimator() {
+    const checked = document.getElementById('toggleTimeline').checked;
+    document.getElementById('timelineContainer').classList.toggle('visible', checked);
+  }
+
+  function saveScenario() {
+    const ofe = parseFloat(document.getElementById('ofensivaInput').value) || 0;
+    const def = parseFloat(document.getElementById('defensaInput').value) || 0;
+    const ammo = (parseFloat(document.getElementById('ammo1').value) || 0) + (parseFloat(document.getElementById('ammo2').value) || 0);
+
+    const results = {};
+    STRUCTURES.forEach(s => {
+      const r = computeStructure(s, ofe, def, ammo);
+      results[s.id] = `${formatClock(r.t1)} / ${formatClock(r.t2)}`;
+    });
+
+    const allSame = STRUCTURES.every(s => s.zone === STRUCTURES[0].zone);
+    const zoneLabel = allSame ? `Zona ${STRUCTURES[0].zone}%` : 'Zonas mixtas';
+
+    savedScenarios.push({
+      label: `#${savedScenarios.length + 1} (${zoneLabel})`,
+      stats: `${ofe}% / ${def}%`,
+      ammo: `-${ammo}s`,
+      results
+    });
+
+    renderComparison();
+  }
+
+  function renderComparison() {
+    const sec = document.getElementById('compSection');
+    const body = document.getElementById('compBody');
+    if (savedScenarios.length === 0) {
+      sec.style.display = 'none';
+      return;
+    }
+    sec.style.display = 'block';
+    body.innerHTML = savedScenarios.map(item => `
+      <tr>
+        <td style="font-family:sans-serif; font-weight:600;">${item.label}</td>
+        <td>${item.stats}</td>
+        <td>${item.ammo}</td>
+        <td>${item.results.hangar}</td>
+        <td>${item.results.guarnicion}</td>
+        <td>${item.results.arsenal}</td>
+        <td>${item.results.bunker}</td>
+      </tr>
+    `).join('');
+  }
+
+  function clearScenarios() {
+    savedScenarios = [];
+    renderComparison();
+  }
+
+  // Inicializar
+  recalculate();
+</script>
+</body>
+</html>
