@@ -1,1006 +1,1380 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora EDST - Simulador de Despliegue Táctico</title>
-<style>
-  :root {
-    --bg-main: #0b0f17;
-    --bg-panel: #131a26;
-    --bg-card: #182130;
-    --bg-input: #0e141f;
-    --border: #263347;
-    --text-main: #e6edf7;
-    --text-muted: #8b9bb4;
-    --accent: #38bdf8;
-    --accent-hover: #0ea5e9;
-    --green: #10b981;
-    --green-bg: rgba(16, 185, 129, 0.14);
-    --amber: #f59e0b;
-    --amber-bg: rgba(245, 158, 11, 0.14);
-    --red: #ef4444;
-    --red-bg: rgba(239, 68, 68, 0.15);
-    --purple: #a855f7;
-    --purple-bg: rgba(168, 85, 247, 0.15);
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora EDST - Simulador de Despliegue Táctico</title>
+  <style>
+    :root {
+      --bg-body: #090d16;
+      --bg-panel: #111827;
+      --bg-card: #151e30;
+      --bg-card-inner: #0e1523;
+      --bg-hover: #1e293b;
+      --border-subtle: #243047;
+      --border-focus: #38bdf8;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-orange: #f97316;
+      --accent-red: #f87171;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    line-height: 1.5;
-    padding: 20px;
-  }
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.45;
+      min-height: 100vh;
+      padding: 16px;
+    }
 
-  .mono {
-    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
-    font-variant-numeric: tabular-nums;
-  }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+      font-family: var(--font-mono);
+    }
 
-  .container {
-    max-width: 1360px;
-    margin: 0 auto;
-  }
+    .container {
+      max-width: 1260px;
+      margin: 0 auto;
+    }
 
-  /* Header */
-  header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px 24px;
-    margin-bottom: 20px;
-  }
+    /* Header */
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
 
-  .header-title h1 {
-    font-size: 1.35rem;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+    .brand h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-  .badge-version {
-    font-size: 0.72rem;
-    background: rgba(56, 189, 248, 0.15);
-    color: var(--accent);
-    border: 1px solid rgba(56, 189, 248, 0.35);
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-weight: 600;
-  }
+    .brand p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
 
-  .header-title p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
-  .presets {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
+    .btn-ghost {
+      background: var(--bg-card-inner);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
 
-  button {
-    background: var(--bg-card);
-    color: var(--text-main);
-    border: 1px solid var(--border);
-    padding: 8px 13px;
-    border-radius: 8px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
+    .btn-ghost:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: #3b4d6e;
+    }
 
-  button:hover {
-    border-color: var(--accent);
-    background: #1e293b;
-  }
+    .lang-group {
+      display: inline-flex;
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 2px;
+    }
 
-  button.primary {
-    background: rgba(56, 189, 248, 0.16);
-    border-color: var(--accent);
-    color: var(--accent);
-  }
+    .lang-btn {
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
 
-  button.primary:hover {
-    background: rgba(56, 189, 248, 0.25);
-  }
+    .lang-btn.active {
+      background: var(--accent-blue);
+      color: #ffffff;
+    }
 
-  /* Main Grid */
-  .main-grid {
-    display: grid;
-    grid-template-columns: 370px 1fr;
-    gap: 20px;
-    align-items: start;
-  }
+    .help-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
 
-  @media (max-width: 980px) {
+    .help-btn:hover {
+      background: rgba(56, 189, 248, 0.25);
+    }
+
+    /* Main Grid */
     .main-grid {
-      grid-template-columns: 1fr;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 16px;
+      align-items: start;
     }
-  }
 
-  /* Left Panel */
-  .panel {
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-  }
+    @media (max-width: 960px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
 
-  .section-block {
-    margin-bottom: 22px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-  }
+    /* Left Controls */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
 
-  .section-block:last-child {
-    margin-bottom: 0;
-    padding-bottom: 0;
-    border-bottom: none;
-  }
+    .control-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+    }
 
-  .section-title {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--accent);
-    font-weight: 700;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+    .control-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent-cyan);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-  .control-group {
-    margin-bottom: 14px;
-  }
+    .stat-group {
+      margin-bottom: 14px;
+    }
 
-  .control-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-    font-size: 0.88rem;
-  }
+    .stat-group:last-child {
+      margin-bottom: 0;
+    }
 
-  .num-input-wrap {
-    display: flex;
-    align-items: center;
-    background: var(--bg-input);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 2px 8px;
-  }
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
 
-  .num-input-wrap input[type="number"] {
-    width: 64px;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-weight: 700;
-    font-size: 0.92rem;
-    text-align: right;
-    outline: none;
-  }
+    .stat-input-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 3px 8px;
+      width: 92px;
+    }
 
-  .num-input-wrap span {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-left: 3px;
-  }
+    .stat-input-wrap input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-align: right;
+      outline: none;
+    }
 
-  input[type="range"] {
-    width: 100%;
-    accent-color: var(--accent);
-    cursor: pointer;
-  }
+    .stat-input-wrap span {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-left: 3px;
+      font-family: var(--font-mono);
+    }
 
-  .helper-note {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    background: rgba(14, 20, 31, 0.7);
-    border-left: 3px solid var(--purple);
-    padding: 8px 10px;
-    border-radius: 4px;
-    margin-bottom: 12px;
-  }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
+      height: 5px;
+      background: var(--bg-card-inner);
+      border-radius: 4px;
+    }
 
-  /* Radio Zone Buttons */
-  .zone-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+    /* Zone Options */
+    .zone-hint {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
 
-  .zone-option {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--bg-input);
-    border: 1px solid var(--border);
-    padding: 9px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
+    .zone-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
 
-  .zone-option:hover {
-    border-color: #475569;
-  }
+    .zone-btn {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 8px 10px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
 
-  .zone-option.active {
-    border-color: var(--purple);
-    background: var(--purple-bg);
-  }
+    .zone-btn:hover {
+      border-color: #3b4d6e;
+      background: var(--bg-hover);
+    }
 
-  .zone-option-label {
-    font-size: 0.84rem;
-    font-weight: 600;
-  }
+    .zone-btn.active {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: var(--accent-cyan);
+    }
 
-  .zone-option-sub {
-    font-size: 0.73rem;
-    color: var(--text-muted);
-    display: block;
-  }
+    .zone-btn .z-name {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
 
-  .zone-badge {
-    font-size: 0.82rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 6px;
-    background: rgba(255,255,255,0.06);
-  }
+    .zone-btn .z-val {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+    }
 
-  .zone-option.active .zone-badge {
-    background: var(--purple);
-    color: #fff;
-  }
+    /* Munitions */
+    .munition-block {
+      margin-bottom: 12px;
+    }
 
-  /* Municiones */
-  .ammo-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
+    .munition-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 0.82rem;
+    }
 
-  .ammo-box label {
-    display: block;
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    margin-bottom: 4px;
-  }
+    .munition-header .m-label {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
 
-  select {
-    width: 100%;
-    background: var(--bg-input);
-    color: #fff;
-    border: 1px solid var(--border);
-    padding: 8px 10px;
-    border-radius: 7px;
-    font-size: 0.84rem;
-    outline: none;
-    cursor: pointer;
-  }
+    .munition-header .m-sub {
+      color: var(--accent-emerald);
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
 
-  select:focus {
-    border-color: var(--accent);
-  }
+    .btn-row-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
 
-  /* Right Panel */
-  .summary-bar {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 18px;
-  }
+    .btn-row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
 
-  @media (max-width: 600px) {
+    .mun-btn {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: 7px;
+      padding: 7px 4px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+
+    .mun-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .mun-btn.active {
+      background: rgba(16, 185, 129, 0.16);
+      border-color: var(--accent-emerald);
+      color: #6ee7b7;
+    }
+
+    .munition-total-bar {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+
+    .munition-total-bar span:first-child {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .munition-total-bar span:last-child {
+      color: var(--accent-emerald);
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    /* Right Panel & Summary Bar */
+    .results-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
     .summary-bar {
-      grid-template-columns: 1fr;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
     }
-  }
 
-  .stat-pill {
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 16px;
-  }
-
-  .stat-pill .label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .stat-pill .val {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-top: 2px;
-    color: #fff;
-  }
-
-  /* Structure Cards Grid */
-  .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-
-  @media (max-width: 720px) {
-    .cards-grid {
-      grid-template-columns: 1fr;
+    .summary-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
     }
-  }
 
-  .struct-card {
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    transition: border-color 0.2s ease;
-  }
+    .summary-card .s-title {
+      font-size: clamp(0.68rem, 1.8vw, 0.78rem);
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-  .struct-card:hover {
-    border-color: #3b4d6b;
-  }
+    .summary-card .s-value {
+      font-size: clamp(1.15rem, 3.2vw, 1.65rem);
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
 
-  .struct-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-  }
+    .summary-card .s-sub {
+      font-size: clamp(0.64rem, 1.6vw, 0.75rem);
+      color: var(--text-muted);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-  .struct-name {
-    font-size: 1.08rem;
-    font-weight: 700;
-    color: #fff;
-  }
+    @media (max-width: 520px) {
+      .summary-bar {
+        gap: 6px;
+      }
+      .summary-card {
+        padding: 9px 8px;
+      }
+    }
 
-  .struct-meta {
-    font-size: 0.76rem;
-    color: var(--text-muted);
-  }
+    /* Structure Cards Grid */
+    .structures-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
 
-  .neto-chip {
-    font-size: 0.78rem;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 6px;
-    background: rgba(56, 189, 248, 0.14);
-    color: var(--accent);
-    border: 1px solid rgba(56, 189, 248, 0.3);
-    white-space: nowrap;
-  }
+    @media (max-width: 680px) {
+      .structures-grid {
+        grid-template-columns: 1fr;
+      }
+    }
 
-  .card-zone-select {
-    background: var(--bg-input);
-    padding: 8px 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-  }
+    .struct-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-  .card-zone-select label {
-    display: block;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-  }
+    .struct-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
 
-  .waves-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
+    .struct-name {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
 
-  .wave-box {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 12px;
-  }
+    .neto-chip {
+      font-size: 0.73rem;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
 
-  .wave-title {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-  }
+    /* Progressive soft semantic palette for neto-chip */
+    .chip-cap {
+      background: rgba(56, 189, 248, 0.12);
+      color: #7dd3fc;
+      border-color: rgba(56, 189, 248, 0.32);
+    }
+    .chip-superior {
+      background: rgba(16, 185, 129, 0.13);
+      color: #6ee7b7;
+      border-color: rgba(16, 185, 129, 0.32);
+    }
+    .chip-optimo {
+      background: rgba(245, 158, 11, 0.13);
+      color: #fcd34d;
+      border-color: rgba(245, 158, 11, 0.32);
+    }
+    .chip-lento {
+      background: rgba(249, 115, 22, 0.14);
+      color: #fdba74;
+      border-color: rgba(249, 115, 22, 0.34);
+    }
+    .chip-critico {
+      background: rgba(248, 113, 113, 0.14);
+      color: #fca5a5;
+      border-color: rgba(248, 113, 113, 0.35);
+    }
 
-  .wave-time {
-    font-size: 1.45rem;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: -0.5px;
-  }
+    .struct-zone-select {
+      width: 100%;
+      background: var(--bg-card-inner);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 7px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+    }
 
-  .wave-sec {
-    font-size: 0.76rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
+    .struct-zone-select:focus {
+      border-color: var(--accent-cyan);
+    }
 
-  .tag {
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 4px;
-    text-transform: uppercase;
-  }
+    .waves-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
 
-  .tag-cap {
-    background: var(--green-bg);
-    color: var(--green);
-    border: 1px solid rgba(16, 185, 129, 0.35);
-  }
+    .wave-box {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9px;
+      padding: 10px 12px;
+    }
 
-  .tag-warn {
-    background: var(--amber-bg);
-    color: var(--amber);
-    border: 1px solid rgba(245, 158, 11, 0.35);
-  }
+    .wave-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
 
-  .tag-danger {
-    background: var(--red-bg);
-    color: var(--red);
-    border: 1px solid rgba(239, 68, 68, 0.35);
-  }
+    .wave-label {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
 
-  .battle-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.8rem;
-    padding-top: 10px;
-    border-top: 1px dashed var(--border);
-  }
+    .tag-cap {
+      font-size: 0.66rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-family: var(--font-mono);
+    }
 
-  /* Optional Wave Estimator & Timeline */
-  .extra-panel {
-    margin-top: 18px;
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px;
-  }
+    .wave-time {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
 
-  .extra-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
+    .wave-time.over-limit {
+      color: var(--accent-red);
+    }
 
-  .toggle-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    cursor: pointer;
-  }
+    .wave-sec {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
 
-  .timeline-container {
-    margin-top: 16px;
-    display: none;
-  }
+    .battle-clock-box {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9px;
+      padding: 9px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.78rem;
+    }
 
-  .timeline-container.visible {
-    display: block;
-  }
+    .clock-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
 
-  .timeline-row {
-    margin-bottom: 12px;
-  }
+    .clock-line .c-lbl {
+      color: var(--text-secondary);
+    }
 
-  .timeline-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    margin-bottom: 4px;
-  }
+    .clock-line .c-val {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
 
-  .timeline-track {
-    position: relative;
-    height: 16px;
-    background: var(--bg-input);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
+    .clock-line .c-val.warn {
+      color: var(--accent-red);
+    }
 
-  .timeline-dot {
-    position: absolute;
-    top: 2px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    transform: translateX(-50%);
-  }
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 7, 13, 0.78);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
 
-  .dot-w1 { background: var(--green); }
-  .dot-w2 { background: var(--accent); }
+    .modal-backdrop.open {
+      display: flex;
+    }
 
-  /* Comparator Table */
-  .comp-section {
-    margin-top: 18px;
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px;
-    overflow-x: auto;
-  }
+    .modal-box {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      max-width: 620px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 20px 22px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+    }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
-    margin-top: 12px;
-  }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
 
-  th, td {
-    padding: 9px 10px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
+    .modal-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
 
-  th {
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-  }
-</style>
+    .modal-close {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .help-section {
+      margin-bottom: 14px;
+    }
+
+    .help-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .help-section h3 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .help-section p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+  </style>
 </head>
 <body>
-
-<div class="container">
-  <header>
-    <div class="header-title">
-      <h1>Calculadora EDST <span class="badge-version">30 FPS Engine</span></h1>
-      <p>Simulador de tiempos de despliegue defensivo · 1ª Oleada y 2ª+ Oleada (Combate 03:30,00)</p>
-    </div>
-    <div class="presets">
-      <button onclick="applyPreset(0, 0, 0, 0, 0)">Base 0% vs 0%</button>
-      <button onclick="applyPreset(200, -100, 0, 0, 0)">Test -100% / 200%</button>
-      <button class="primary" onclick="applyPreset(200, -100, -42, 4, 3)">Full Sinergia (-42% | -7s)</button>
-    </div>
-  </header>
-
-  <div class="main-grid">
-    <!-- PANEL IZQUIERDO: CONTROLES -->
-    <aside class="panel">
-      <div class="section-block">
-        <div class="section-title">1. Estadísticas de Combate</div>
-
-        <div class="control-group">
-          <div class="control-header">
-            <label for="ofensivaInput">Ofensiva del Atacante</label>
-            <div class="num-input-wrap">
-              <input type="number" id="ofensivaInput" class="mono" value="200" min="0" max="800" step="5" oninput="syncStats('ofensiva', this.value)">
-              <span>%</span>
-            </div>
-          </div>
-          <input type="range" id="ofensivaRange" value="200" min="0" max="600" step="5" oninput="syncStats('ofensiva', this.value)">
-        </div>
-
-        <div class="control-group" style="margin-bottom:0;">
-          <div class="control-header">
-            <label for="defensaInput">Defensa Base del Defensor</label>
-            <div class="num-input-wrap">
-              <input type="number" id="defensaInput" class="mono" value="-100" min="-400" max="200" step="5" oninput="syncStats('defensa', this.value)">
-              <span>%</span>
-            </div>
-          </div>
-          <input type="range" id="defensaRange" value="-100" min="-300" max="100" step="5" oninput="syncStats('defensa', this.value)">
-        </div>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <h1 id="ui-title">Calculadora EDST</h1>
+        <p id="ui-subtitle">Simulador de despliegue defensivo · 1ª y 2ª+ Oleada (Combate 03:30)</p>
       </div>
-
-      <div class="section-block">
-        <div class="section-title">
-          <span>2. Zona de Maravilla (Global)</span>
+      <div class="header-actions">
+        <button class="btn-ghost" id="btn-reset">Restablecer</button>
+        <div class="lang-group" role="group" aria-label="Idioma">
+          <button class="lang-btn active" id="lang-es" data-lang="es">ES</button>
+          <button class="lang-btn" id="lang-en" data-lang="en">EN</button>
         </div>
-        <div class="helper-note">
-          Aplica solo a edificios dentro del área de efecto. <strong>Boudica (-20%)</strong> se acumula aditivamente sobre la <strong>Acrópolis (-22%)</strong> hasta un total de <strong>-42%</strong>.
-        </div>
-
-        <div class="zone-list" id="globalZoneList">
-          <div class="zone-option" data-val="0" onclick="setGlobalZone(0)">
-            <div>
-              <span class="zone-option-label">Fuera de rango</span>
-              <span class="zone-option-sub">Sin cobertura de maravilla</span>
-            </div>
-            <span class="zone-badge mono">0%</span>
-          </div>
-          <div class="zone-option" data-val="-20" onclick="setGlobalZone(-20)">
-            <div>
-              <span class="zone-option-label">Maravilla general + Boudica</span>
-              <span class="zone-option-sub">Solo bono de consejera</span>
-            </div>
-            <span class="zone-badge mono">-20%</span>
-          </div>
-          <div class="zone-option" data-val="-22" onclick="setGlobalZone(-22)">
-            <div>
-              <span class="zone-option-label">Solo Acrópolis</span>
-              <span class="zone-option-sub">Sin Boudica asignada</span>
-            </div>
-            <span class="zone-badge mono">-22%</span>
-          </div>
-          <div class="zone-option active" data-val="-42" onclick="setGlobalZone(-42)">
-            <div>
-              <span class="zone-option-label">Acrópolis + Boudica</span>
-              <span class="zone-option-sub">Sinergia acumulada (-22% + -20%)</span>
-            </div>
-            <span class="zone-badge mono">-42%</span>
-          </div>
-        </div>
+        <button class="help-btn" id="btn-help" title="Ayuda">?</button>
       </div>
+    </header>
 
-      <div class="section-block">
-        <div class="section-title">3. Municiones Equipadas</div>
-        <div class="ammo-grid">
-          <div class="ammo-box">
-            <label for="ammo1">Munición 1</label>
-            <select id="ammo1" class="mono" onchange="recalculate()">
-              <option value="0">Sin equipar (0 s)</option>
-              <option value="3">Nivel intermedio (-3 s)</option>
-              <option value="4" selected>Nivel máximo (-4 s)</option>
-            </select>
+    <div class="main-grid">
+      <!-- Left Controls -->
+      <aside class="controls-panel">
+        <!-- 1. Combat Stats -->
+        <section class="control-card">
+          <div class="control-title">
+            <span id="ui-sec1-title">1. Estadísticas de Combate</span>
           </div>
-          <div class="ammo-box">
-            <label for="ammo2">Munición 2</label>
-            <select id="ammo2" class="mono" onchange="recalculate()">
-              <option value="0">Sin equipar (0 s)</option>
-              <option value="3" selected>Nivel máximo (-3 s)</option>
-            </select>
+
+          <div class="stat-group">
+            <div class="stat-header">
+              <label for="input-atk" id="ui-atk-label">Ofensiva del Atacante</label>
+              <div class="stat-input-wrap">
+                <input type="number" id="input-atk" value="200" min="-200" max="800" step="1" class="tabular-nums" />
+                <span>%</span>
+              </div>
+            </div>
+            <input type="range" id="slider-atk" value="200" min="0" max="600" step="1" />
           </div>
-        </div>
-      </div>
-    </aside>
 
-    <!-- PANEL DERECHO: RESULTADOS -->
-    <main>
-      <div class="summary-bar">
-        <div class="stat-pill">
-          <div class="label">Cruce Base (Sin Maravilla)</div>
-          <div class="val mono" id="sumBaseNeto">+100%</div>
-        </div>
-        <div class="stat-pill">
-          <div class="label">Deducción Municiones</div>
-          <div class="val mono" id="sumAmmo" style="color: var(--green);">-7,00 s</div>
-        </div>
-        <div class="stat-pill">
-          <div class="label">Duración Máx. Combate</div>
-          <div class="val mono">03:30,00 <span style="font-size:0.75rem; color:var(--text-muted);">(210s)</span></div>
-        </div>
-      </div>
+          <div class="stat-group">
+            <div class="stat-header">
+              <label for="input-def" id="ui-def-label">Defensa Base del Defensor</label>
+              <div class="stat-input-wrap">
+                <input type="number" id="input-def" value="-100" min="-400" max="200" step="1" class="tabular-nums" />
+                <span>%</span>
+              </div>
+            </div>
+            <input type="range" id="slider-def" value="-100" min="-300" max="100" step="1" />
+          </div>
+        </section>
 
-      <div class="cards-grid" id="cardsContainer"></div>
-
-      <!-- ESTIMADOR OPCIONAL DE OLEADAS -->
-      <div class="extra-panel">
-        <div class="extra-header">
-          <label class="toggle-label">
-            <input type="checkbox" id="toggleTimeline" onchange="toggleEstimator()">
-            Mostrar estimador de oleadas totales y línea de tiempo (0:00 → 3:30)
-          </label>
-          <button class="primary" onclick="saveScenario()">+ Guardar escenario para comparar</button>
-        </div>
-
-        <div class="timeline-container" id="timelineContainer">
-          <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">
-            Puntos verdes = 1ª Oleada (T₁) · Puntos azules = Oleadas siguientes cada T₂ segundos hasta el minuto 3:30,00.
+        <!-- 2. Wonder Zone -->
+        <section class="control-card">
+          <div class="control-title">
+            <span id="ui-sec2-title">2. Zona de Maravilla (Global)</span>
+          </div>
+          <p class="zone-hint" id="ui-zone-hint">
+            Boudica (-20%) se acumula aditivamente sobre la Acrópolis (-22%) hasta un total de -42% en su rango.
           </p>
-          <div id="timelineBars"></div>
-        </div>
-      </div>
+          <div class="zone-grid" id="global-zone-grid">
+            <button type="button" class="zone-btn active" data-zone="0">
+              <span class="z-name" id="z-lbl-0">Fuera de rango</span>
+              <span class="z-val">0%</span>
+            </button>
+            <button type="button" class="zone-btn" data-zone="-20">
+              <span class="z-name" id="z-lbl-20">Maravilla + Boudica</span>
+              <span class="z-val">-20%</span>
+            </button>
+            <button type="button" class="zone-btn" data-zone="-22">
+              <span class="z-name" id="z-lbl-22">Solo Acrópolis</span>
+              <span class="z-val">-22%</span>
+            </button>
+            <button type="button" class="zone-btn" data-zone="-42">
+              <span class="z-name" id="z-lbl-42">Acrópolis + Boudica</span>
+              <span class="z-val">-42%</span>
+            </button>
+          </div>
+        </section>
 
-      <!-- COMPARADOR DE ESCENARIOS -->
-      <div class="comp-section" id="compSection" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span class="section-title" style="margin:0;">Comparador de Escenarios Guardados</span>
-          <button onclick="clearScenarios()" style="padding:4px 10px; font-size:0.75rem;">Limpiar tabla</button>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Escenario</th>
-              <th>Ofe / Def</th>
-              <th>Mun.</th>
-              <th>Hangar (T₁ / T₂)</th>
-              <th>Guarnición (T₁ / T₂)</th>
-              <th>Arsenal (T₁ / T₂)</th>
-              <th>Bunker (T₁ / T₂)</th>
-            </tr>
-          </thead>
-          <tbody id="compBody" class="mono"></tbody>
-        </table>
-      </div>
-    </main>
+        <!-- 3. Munitions -->
+        <section class="control-card">
+          <div class="control-title">
+            <span id="ui-sec3-title">3. Municiones Equipadas</span>
+          </div>
+
+          <div class="munition-block">
+            <div class="munition-header">
+              <span class="m-label" id="ui-mun1-label">Radio de despliegue rápido</span>
+              <span class="m-sub tabular-nums" id="mun1-sub">0s</span>
+            </div>
+            <div class="btn-row-5" id="mun1-group">
+              <button type="button" class="mun-btn tabular-nums active" data-val="0">0s</button>
+              <button type="button" class="mun-btn tabular-nums" data-val="1">-1s</button>
+              <button type="button" class="mun-btn tabular-nums" data-val="2">-2s</button>
+              <button type="button" class="mun-btn tabular-nums" data-val="3">-3s</button>
+              <button type="button" class="mun-btn tabular-nums" data-val="4">-4s</button>
+            </div>
+          </div>
+
+          <div class="munition-block">
+            <div class="munition-header">
+              <span class="m-label" id="ui-mun2-label">Sistema de alerta de emergencia</span>
+              <span class="m-sub tabular-nums" id="mun2-sub">0s</span>
+            </div>
+            <div class="btn-row-3" id="mun2-group">
+              <button type="button" class="mun-btn tabular-nums active" data-val="0">0s</button>
+              <button type="button" class="mun-btn tabular-nums" data-val="2">-2s</button>
+              <button type="button" class="mun-btn tabular-nums" data-val="3">-3s</button>
+            </div>
+          </div>
+
+          <div class="munition-total-bar">
+            <span id="ui-mun-total-label">Total deducción municiones</span>
+            <span class="tabular-nums" id="mun-total-val">0s</span>
+          </div>
+        </section>
+      </aside>
+
+      <!-- Right Results -->
+      <main class="results-panel">
+        <!-- Summary Bar (Always 3 columns side by side) -->
+        <section class="summary-bar">
+          <div class="summary-card">
+            <div class="s-title" id="sum-net-title">Porcentaje Neto</div>
+            <div class="s-value tabular-nums" id="sum-net-val">+100%</div>
+            <div class="s-sub tabular-nums" id="sum-net-sub">200% Ataque · -100% Defensa</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="s-title" id="sum-def-title">Defensa Total Aplicada</div>
+            <div class="s-value tabular-nums" id="sum-def-val">-100%</div>
+            <div class="s-sub tabular-nums" id="sum-def-sub">-100% base · 0% bonos</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="s-title" id="sum-mun-title">Deducción por Municiones</div>
+            <div class="s-value tabular-nums" id="sum-mun-val">0s</div>
+            <div class="s-sub">&nbsp;</div>
+          </div>
+        </section>
+
+        <!-- Structures Cards -->
+        <section class="structures-grid" id="structures-container"></section>
+      </main>
+    </div>
   </div>
-</div>
 
-<script>
-  const STRUCTURES = [
-    { id: 'hangar', name: 'Hangar', base1: 1.86, inc1: 10.00, base2: 12.62, inc2: 19.00, zone: -42 },
-    { id: 'guarnicion', name: 'Guarnición', base1: 2.12, inc1: 10.00, base2: 16.78, inc2: 25.00, zone: -42 },
-    { id: 'arsenal', name: 'Arsenal Cohete', base1: 3.00, inc1: 3.00, base2: 14.87, inc2: 18.00, zone: -42 },
-    { id: 'bunker', name: 'Bunker', base1: 6.92, inc1: 10.00, base2: 40.25, inc2: 60.00, zone: -42 }
-  ];
+  <!-- Help Modal -->
+  <div class="modal-backdrop" id="help-modal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="help-modal-title">Ayuda</h2>
+        <button class="modal-close" id="btn-close-help" aria-label="Cerrar">✕</button>
+      </div>
+      <div id="help-modal-body"></div>
+    </div>
+  </div>
 
-  let savedScenarios = [];
+  <script>
+    const STRUCTURES = [
+      { id: "hangar", key: "hangar", base1: 1.86, inc1: 10.00, base2: 12.62, inc2: 19.00 },
+      { id: "garrison", key: "garrison", base1: 2.12, inc1: 10.00, base2: 16.78, inc2: 25.00 },
+      { id: "rocket", key: "rocket", base1: 3.00, inc1: 3.00, base2: 14.87, inc2: 18.00 },
+      { id: "bunker", key: "bunker", base1: 6.92, inc1: 10.00, base2: 40.25, inc2: 60.00 }
+    ];
 
-  function formatClock(sec) {
-    const mins = Math.floor(sec / 60);
-    const rem = sec % 60;
-    const wholeSec = Math.floor(rem);
-    const centis = Math.round((rem - wholeSec) * 100);
-    let finalSec = wholeSec;
-    let finalMin = mins;
-    let finalCentis = centis;
-    if (finalCentis === 100) {
-      finalCentis = 0;
-      finalSec += 1;
-    }
-    if (finalSec === 60) {
-      finalSec = 0;
-      finalMin += 1;
-    }
-    return `${finalMin}:${String(finalSec).padStart(2, '0')},${String(finalCentis).padStart(2, '0')}`;
-  }
-
-  function formatDecimal(sec) {
-    return sec.toFixed(2).replace('.', ',') + ' s';
-  }
-
-  function syncStats(type, val) {
-    const num = parseFloat(val) || 0;
-    if (type === 'ofensiva') {
-      document.getElementById('ofensivaInput').value = num;
-      document.getElementById('ofensivaRange').value = num;
-    } else {
-      document.getElementById('defensaInput').value = num;
-      document.getElementById('defensaRange').value = num;
-    }
-    recalculate();
-  }
-
-  function setGlobalZone(zoneVal) {
-    document.querySelectorAll('#globalZoneList .zone-option').forEach(el => {
-      el.classList.toggle('active', parseInt(el.dataset.val) === zoneVal);
-    });
-    STRUCTURES.forEach(s => s.zone = zoneVal);
-    recalculate();
-  }
-
-  function setCardZone(structId, zoneVal) {
-    const target = STRUCTURES.find(s => s.id === structId);
-    if (target) target.zone = parseInt(zoneVal);
-    // Actualizar estado visual de botones globales si todos coinciden
-    const allSame = STRUCTURES.every(s => s.zone === STRUCTURES[0].zone);
-    document.querySelectorAll('#globalZoneList .zone-option').forEach(el => {
-      el.classList.toggle('active', allSame && parseInt(el.dataset.val) === STRUCTURES[0].zone);
-    });
-    recalculate();
-  }
-
-  function applyPreset(ofe, def, zone, a1, a2) {
-    syncStats('ofensiva', ofe);
-    syncStats('defensa', def);
-    document.getElementById('ammo1').value = a1;
-    document.getElementById('ammo2').value = a2;
-    setGlobalZone(zone);
-  }
-
-  function computeStructure(s, ofe, def, ammoDeduction) {
-    const defTotal = def + s.zone;
-    const netoPct = ofe + defTotal;
-    const netoDec = netoPct / 100;
-
-    const raw1 = s.base1 + (s.inc1 * netoDec) - ammoDeduction;
-    const t1 = Math.max(2.00, raw1);
-    const cap1 = raw1 <= 2.00;
-
-    const raw2 = s.base2 + (s.inc2 * netoDec) - ammoDeduction;
-    const t2 = Math.max(10.00, raw2);
-    const cap2 = raw2 <= 10.00;
-
-    const secondWaveClock = t1 + t2;
-    const totalWaves = t1 > 210 ? 0 : 1 + Math.floor((210 - t1) / t2);
-
-    return { defTotal, netoPct, t1, cap1, t2, cap2, secondWaveClock, totalWaves };
-  }
-
-  function recalculate() {
-    const ofe = parseFloat(document.getElementById('ofensivaInput').value) || 0;
-    const def = parseFloat(document.getElementById('defensaInput').value) || 0;
-    const a1 = parseFloat(document.getElementById('ammo1').value) || 0;
-    const a2 = parseFloat(document.getElementById('ammo2').value) || 0;
-    const ammoDeduction = a1 + a2;
-
-    const baseNeto = ofe + def;
-    document.getElementById('sumBaseNeto').textContent = (baseNeto >= 0 ? '+' : '') + baseNeto + '%';
-    document.getElementById('sumAmmo').textContent = `-${ammoDeduction.toFixed(2).replace('.', ',')} s`;
-
-    const container = document.getElementById('cardsContainer');
-    const timelineBars = document.getElementById('timelineBars');
-    container.innerHTML = '';
-    timelineBars.innerHTML = '';
-
-    STRUCTURES.forEach(s => {
-      const res = computeStructure(s, ofe, def, ammoDeduction);
-      const netoStr = (res.netoPct >= 0 ? '+' : '') + res.netoPct + '%';
-
-      let statusHtml = '';
-      if (res.t1 > 210) {
-        statusHtml = `<span class="tag tag-danger">No despliega en 3:30</span>`;
-      } else if (res.secondWaveClock > 210) {
-        statusHtml = `<span class="tag tag-warn">2ª oleada supera 3:30 (${formatClock(res.secondWaveClock)})</span>`;
-      } else {
-        statusHtml = `<span style="color:var(--green); font-weight:600;" class="mono">2ª sale a las ${formatClock(res.secondWaveClock)}</span>`;
+    const I18N = {
+      es: {
+        title: "Calculadora EDST",
+        subtitle: "Simulador de despliegue defensivo · 1ª y 2ª+ Oleada (Combate 03:30)",
+        reset: "Restablecer",
+        sec1: "1. Estadísticas de Combate",
+        atkLabel: "Ofensiva del Atacante",
+        defLabel: "Defensa Base del Defensor",
+        sec2: "2. Zona de Maravilla (Global)",
+        zoneHint: "Boudica (-20%) se acumula aditivamente sobre la Acrópolis (-22%) hasta un total de -42% en su rango.",
+        zones: {
+          "0": "Fuera de rango (0%)",
+          "-20": "Maravilla + Boudica (-20%)",
+          "-22": "Solo Acrópolis (-22%)",
+          "-42": "Acrópolis + Boudica (-42%)"
+        },
+        zonesShort: {
+          "0": "Fuera de rango",
+          "-20": "Maravilla + Boudica",
+          "-22": "Solo Acrópolis",
+          "-42": "Acrópolis + Boudica"
+        },
+        sec3: "3. Municiones Equipadas",
+        mun1Label: "Radio de despliegue rápido",
+        mun2Label: "Sistema de alerta de emergencia",
+        munTotalLabel: "Total deducción municiones",
+        sumNetTitle: "Porcentaje Neto",
+        sumNetSub: (atk, def) => `${atk}% Ataque ${def >= 0 ? "+" + def : def}% Defensa`,
+        sumDefTitle: "Defensa Total Aplicada",
+        sumDefSub: (base, bonus) => `${base}% base · ${bonus}% bonos`,
+        sumMunTitle: "Deducción por Municiones",
+        structs: {
+          hangar: "Hangar de tanques",
+          garrison: "Guarnición",
+          rocket: "Arsenal de cohetes",
+          bunker: "Búnker"
+        },
+        wave1: "1ª Oleada",
+        wave2: "2ª+ Oleada",
+        cap2: "CAP 2s",
+        cap10: "CAP 10s",
+        battleClock: "Reloj de batalla (2ª oleada):",
+        estWaves: "Oleadas estimadas en combate:",
+        noDeploy1: "No despliega (1ª > 03:30)",
+        outOfTime: (t) => `${t} (> 03:30)`,
+        waveWord: (n) => n === 1 ? "1 oleada" : `${n} oleadas`,
+        chips: {
+          cap: "Cap mínimo",
+          superior: "Despliegue superior",
+          optimo: "Despliegue óptimo",
+          lento: "Despliegue lento",
+          critico: "Despliegue crítico"
+        },
+        helpTitle: "Ayuda",
+        helpSections: [
+          {
+            h: "¿Cómo usar la herramienta?",
+            p: "Ingrese los valores de tiempo de salida (tanto de ataque como de defensa) en los campos correspondientes para obtener un cálculo aproximado del tiempo de la primera oleada y las sucesivas."
+          },
+          {
+            h: "Propósito",
+            p: "Esta calculadora te permite estimar los tiempos entre las oleadas de defensores enemigos. Su objetivo es ayudarte a evaluar el impacto de tus estadísticas de ataque y defensa, brindándote datos clave para planificar mejor tu estrategia antes de la batalla."
+          },
+          {
+            h: "Metodología de desarrollo",
+            p: "Se realizaron múltiples pruebas de ataques en reto de guerra ajustando los valores de tiempo de salida en ataque y defensa. Todas las bonificaciones adicionales del juego fueron tenidas en cuenta, investigaciones en la Universidad, Biblioteca, Bonus de la Alianza, Acrópolis y demás topes. Las partidas se analizaron a detalle para determinar los intervalos de despliegue de tropas y contrastar datos obtenidos con información disponible del juego. Mediante interpolación entre los puntos medidos y extrapolación lineal de los resultados obtenidos se logró el desarrollo de esta herramienta."
+          },
+          {
+            h: "Margen de precisión",
+            p: "Teniendo en cuenta el mecanismo para la obtención de datos más algunas inconsistencias como breves retrasos de las animaciones y transiciones del juego, podemos esperar un pequeño margen de error aproximado de ± 0,3 segundos en la primer oleadas y hasta ± 1 segundos para oleadas adicionales. Aunque no es 100% exacta, ofrece una aproximación muy cercana a la realidad para optimizar tu estrategia para las Guerras Mundiales."
+          }
+        ]
+      },
+      en: {
+        title: "EDST Calculator",
+        subtitle: "Defensive Spawn Simulator · 1st & 2nd+ Wave (03:30 Battle)",
+        reset: "Reset",
+        sec1: "1. Combat Statistics",
+        atkLabel: "Attacker Offensive",
+        defLabel: "Defender Base Defense",
+        sec2: "2. Wonder Coverage (Global)",
+        zoneHint: "Boudica (-20%) stacks additively on top of Acropolis (-22%) up to -42% total within its range.",
+        zones: {
+          "0": "Out of range (0%)",
+          "-20": "Wonder + Boudica (-20%)",
+          "-22": "Acropolis Only (-22%)",
+          "-42": "Acropolis + Boudica (-42%)"
+        },
+        zonesShort: {
+          "0": "Out of range",
+          "-20": "Wonder + Boudica",
+          "-22": "Acropolis Only",
+          "-42": "Acropolis + Boudica"
+        },
+        sec3: "3. Equipped Munitions",
+        mun1Label: "Rapid Deployment Radio",
+        mun2Label: "Emergency Alert System",
+        munTotalLabel: "Total munition reduction",
+        sumNetTitle: "Net Percentage",
+        sumNetSub: (atk, def) => `${atk}% Attack ${def >= 0 ? "+" + def : def}% Defense`,
+        sumDefTitle: "Total Defense Applied",
+        sumDefSub: (base, bonus) => `${base}% base · ${bonus}% bonus`,
+        sumMunTitle: "Munition Deduction",
+        structs: {
+          hangar: "Tank Hangar",
+          garrison: "Garrison",
+          rocket: "Rocket Arsenal",
+          bunker: "Bunker"
+        },
+        wave1: "1st Wave",
+        wave2: "2nd+ Wave",
+        cap2: "CAP 2s",
+        cap10: "CAP 10s",
+        battleClock: "Battle clock (2nd wave):",
+        estWaves: "Estimated waves in battle:",
+        noDeploy1: "No spawn (1st > 03:30)",
+        outOfTime: (t) => `${t} (> 03:30)`,
+        waveWord: (n) => n === 1 ? "1 wave" : `${n} waves`,
+        chips: {
+          cap: "Minimum cap",
+          superior: "Superior spawn",
+          optimo: "Optimal spawn",
+          lento: "Slow spawn",
+          critico: "Critical spawn"
+        },
+        helpTitle: "Help",
+        helpSections: [
+          {
+            h: "How to use the tool?",
+            p: "Enter the spawn time values (both attack and defense) into the corresponding fields to obtain an approximate calculation of the first wave and subsequent wave intervals."
+          },
+          {
+            h: "Purpose",
+            p: "This calculator allows you to estimate the intervals between enemy defender waves. Its goal is to help you evaluate the impact of your attack and defense stats, providing key data to better plan your strategy before battle."
+          },
+          {
+            h: "Development Methodology",
+            p: "Multiple war challenge attack tests were performed adjusting offensive and defensive spawn time values. All additional in-game bonuses were accounted for, including University research, Library, Alliance Bonuses, Acropolis, and other caps. Matches were analyzed in detail to determine troop deployment intervals and cross-reference measured data with available game mechanics. Through interpolation between measured points and linear extrapolation of the results, this tool was developed."
+          },
+          {
+            h: "Accuracy Margin",
+            p: "Considering the data collection mechanism alongside minor inconsistencies such as brief animation delays and game transitions, an approximate margin of error of ± 0.3 seconds for the first wave and up to ± 1 second for additional waves can be expected. While not 100% exact, it provides a very close approximation to reality to optimize your World War strategy."
+          }
+        ]
       }
+    };
 
-      const card = document.createElement('div');
-      card.className = 'struct-card';
-      card.innerHTML = `
-        <div class="struct-header">
-          <div>
-            <div class="struct-name">${s.name}</div>
-            <div class="struct-meta">Base T₁: ${formatDecimal(s.base1)} (+${s.inc1}s) · Base T₂: ${formatDecimal(s.base2)} (+${s.inc2}s)</div>
+    const state = {
+      lang: "es",
+      atk: 200,
+      def: -100,
+      globalZone: 0,
+      mun1: 0,
+      mun2: 0,
+      structZones: {
+        hangar: 0,
+        garrison: 0,
+        rocket: 0,
+        bunker: 0
+      }
+    };
+
+    function formatClock(sec) {
+      const totalCentis = Math.round(sec * 100);
+      const mins = Math.floor(totalCentis / 6000);
+      const remCentis = totalCentis % 6000;
+      const secs = Math.floor(remCentis / 100);
+      const centis = remCentis % 100;
+      const ss = String(secs).padStart(2, "0");
+      const cc = String(centis).padStart(2, "0");
+      return `${mins}:${ss},${cc}`;
+    }
+
+    function formatSignedPct(val) {
+      return val > 0 ? `+${val}%` : `${val}%`;
+    }
+
+    function getChipInfo(t1, t2, netPct, dict) {
+      if (Math.abs(t1 - 2.0) < 0.001 && Math.abs(t2 - 10.0) < 0.001) {
+        return { text: dict.chips.cap, cls: "chip-cap" };
+      }
+      if (netPct <= 50) {
+        return { text: dict.chips.superior, cls: "chip-superior" };
+      }
+      if (netPct <= 150) {
+        return { text: dict.chips.optimo, cls: "chip-optimo" };
+      }
+      if (netPct <= 250) {
+        return { text: dict.chips.lento, cls: "chip-lento" };
+      }
+      return { text: dict.chips.critico, cls: "chip-critico" };
+    }
+
+    function buildStructureCards() {
+      const container = document.getElementById("structures-container");
+      container.innerHTML = STRUCTURES.map(st => `
+        <article class="struct-card" data-struct="${st.id}">
+          <div class="struct-header">
+            <h3 class="struct-name" id="name-${st.id}"></h3>
+            <span class="neto-chip tabular-nums" id="chip-${st.id}"></span>
           </div>
-          <span class="neto-chip mono">Neto: ${netoStr}</span>
-        </div>
 
-        <div class="card-zone-select">
-          <label>Ubicación del edificio (Cobertura)</label>
-          <select onchange="setCardZone('${s.id}', this.value)">
-            <option value="0" ${s.zone === 0 ? 'selected' : ''}>Fuera de rango (0%)</option>
-            <option value="-20" ${s.zone === -20 ? 'selected' : ''}>Maravilla general + Boudica (-20%)</option>
-            <option value="-22" ${s.zone === -22 ? 'selected' : ''}>Solo Acrópolis sin Boudica (-22%)</option>
-            <option value="-42" ${s.zone === -42 ? 'selected' : ''}>Acrópolis + Boudica (-42%)</option>
+          <select class="struct-zone-select" id="select-zone-${st.id}" aria-label="Zona de maravilla">
+            <option value="0"></option>
+            <option value="-20"></option>
+            <option value="-22"></option>
+            <option value="-42"></option>
           </select>
-        </div>
 
-        <div class="waves-row">
-          <div class="wave-box">
-            <div class="wave-title">
-              <span>1ª Oleada (T₁)</span>
-              ${res.cap1 ? '<span class="tag tag-cap">CAP 2s</span>' : ''}
+          <div class="waves-row">
+            <div class="wave-box">
+              <div class="wave-top">
+                <span class="wave-label" id="lbl-w1-${st.id}"></span>
+                <span class="tag-cap" id="cap1-${st.id}" style="display:none;">CAP 2s</span>
+              </div>
+              <div class="wave-time tabular-nums" id="t1-clock-${st.id}">0:00,00</div>
+              <div class="wave-sec tabular-nums" id="t1-sec-${st.id}">0,00s</div>
             </div>
-            <div class="wave-time mono">${formatClock(res.t1)}</div>
-            <div class="wave-sec mono">${formatDecimal(res.t1)}</div>
+
+            <div class="wave-box">
+              <div class="wave-top">
+                <span class="wave-label" id="lbl-w2-${st.id}"></span>
+                <span class="tag-cap" id="cap2-${st.id}" style="display:none;">CAP 10s</span>
+              </div>
+              <div class="wave-time tabular-nums" id="t2-clock-${st.id}">0:00,00</div>
+              <div class="wave-sec tabular-nums" id="t2-sec-${st.id}">0,00s</div>
+            </div>
           </div>
 
-          <div class="wave-box">
-            <div class="wave-title">
-              <span>2ª+ Oleada (T₂)</span>
-              ${res.cap2 ? '<span class="tag tag-cap">CAP 10s</span>' : ''}
+          <div class="battle-clock-box">
+            <div class="clock-line">
+              <span class="c-lbl" id="lbl-clock-${st.id}"></span>
+              <span class="c-val tabular-nums" id="val-clock-${st.id}"></span>
             </div>
-            <div class="wave-time mono">${formatClock(res.t2)}</div>
-            <div class="wave-sec mono">${formatDecimal(res.t2)}</div>
+            <div class="clock-line">
+              <span class="c-lbl" id="lbl-waves-${st.id}"></span>
+              <span class="c-val tabular-nums" id="val-waves-${st.id}"></span>
+            </div>
           </div>
-        </div>
+        </article>
+      `).join("");
 
-        <div class="battle-footer">
-          <span style="color:var(--text-muted);">Reloj de batalla:</span>
-          ${statusHtml}
-        </div>
-      `;
-      container.appendChild(card);
-
-      // Timeline bar
-      let dotsHtml = '';
-      if (res.t1 <= 210) {
-        const pct1 = (res.t1 / 210) * 100;
-        dotsHtml += `<div class="timeline-dot dot-w1" style="left:${pct1}%" title="Oleada 1: ${formatClock(res.t1)}"></div>`;
-        let nextTime = res.t1 + res.t2;
-        let waveIdx = 2;
-        while (nextTime <= 210 && waveIdx <= 25) {
-          const pctN = (nextTime / 210) * 100;
-          dotsHtml += `<div class="timeline-dot dot-w2" style="left:${pctN}%" title="Oleada ${waveIdx}: ${formatClock(nextTime)}"></div>`;
-          nextTime += res.t2;
-          waveIdx++;
-        }
-      }
-
-      const tRow = document.createElement('div');
-      tRow.className = 'timeline-row';
-      tRow.innerHTML = `
-        <div class="timeline-info">
-          <span><strong>${s.name}</strong> <span style="color:var(--text-muted);">(${netoStr} neto)</span></span>
-          <span class="mono" style="color:var(--accent);">${res.totalWaves} oleadas en 3:30</span>
-        </div>
-        <div class="timeline-track">${dotsHtml}</div>
-      `;
-      timelineBars.appendChild(tRow);
-    });
-  }
-
-  function toggleEstimator() {
-    const checked = document.getElementById('toggleTimeline').checked;
-    document.getElementById('timelineContainer').classList.toggle('visible', checked);
-  }
-
-  function saveScenario() {
-    const ofe = parseFloat(document.getElementById('ofensivaInput').value) || 0;
-    const def = parseFloat(document.getElementById('defensaInput').value) || 0;
-    const ammo = (parseFloat(document.getElementById('ammo1').value) || 0) + (parseFloat(document.getElementById('ammo2').value) || 0);
-
-    const results = {};
-    STRUCTURES.forEach(s => {
-      const r = computeStructure(s, ofe, def, ammo);
-      results[s.id] = `${formatClock(r.t1)} / ${formatClock(r.t2)}`;
-    });
-
-    const allSame = STRUCTURES.every(s => s.zone === STRUCTURES[0].zone);
-    const zoneLabel = allSame ? `Zona ${STRUCTURES[0].zone}%` : 'Zonas mixtas';
-
-    savedScenarios.push({
-      label: `#${savedScenarios.length + 1} (${zoneLabel})`,
-      stats: `${ofe}% / ${def}%`,
-      ammo: `-${ammo}s`,
-      results
-    });
-
-    renderComparison();
-  }
-
-  function renderComparison() {
-    const sec = document.getElementById('compSection');
-    const body = document.getElementById('compBody');
-    if (savedScenarios.length === 0) {
-      sec.style.display = 'none';
-      return;
+      STRUCTURES.forEach(st => {
+        const sel = document.getElementById(`select-zone-${st.id}`);
+        sel.addEventListener("change", (e) => {
+          state.structZones[st.id] = Number(e.target.value);
+          render();
+        });
+      });
     }
-    sec.style.display = 'block';
-    body.innerHTML = savedScenarios.map(item => `
-      <tr>
-        <td style="font-family:sans-serif; font-weight:600;">${item.label}</td>
-        <td>${item.stats}</td>
-        <td>${item.ammo}</td>
-        <td>${item.results.hangar}</td>
-        <td>${item.results.guarnicion}</td>
-        <td>${item.results.arsenal}</td>
-        <td>${item.results.bunker}</td>
-      </tr>
-    `).join('');
-  }
 
-  function clearScenarios() {
-    savedScenarios = [];
-    renderComparison();
-  }
+    function renderHelpModal(dict) {
+      document.getElementById("help-modal-title").textContent = dict.helpTitle;
+      const body = document.getElementById("help-modal-body");
+      body.innerHTML = dict.helpSections.map(s => `
+        <div class="help-section">
+          <h3>${s.h}</h3>
+          <p>${s.p}</p>
+        </div>
+      `).join("");
+    }
 
-  // Inicializar
-  recalculate();
-</script>
+    function render() {
+      const dict = I18N[state.lang];
+
+      // Static texts
+      document.documentElement.lang = state.lang;
+      document.getElementById("ui-title").textContent = dict.title;
+      document.getElementById("ui-subtitle").textContent = dict.subtitle;
+      document.getElementById("btn-reset").textContent = dict.reset;
+      document.getElementById("ui-sec1-title").textContent = dict.sec1;
+      document.getElementById("ui-atk-label").textContent = dict.atkLabel;
+      document.getElementById("ui-def-label").textContent = dict.defLabel;
+      document.getElementById("ui-sec2-title").textContent = dict.sec2;
+      document.getElementById("ui-zone-hint").textContent = dict.zoneHint;
+      document.getElementById("z-lbl-0").textContent = dict.zonesShort["0"];
+      document.getElementById("z-lbl-20").textContent = dict.zonesShort["-20"];
+      document.getElementById("z-lbl-22").textContent = dict.zonesShort["-22"];
+      document.getElementById("z-lbl-42").textContent = dict.zonesShort["-42"];
+      document.getElementById("ui-sec3-title").textContent = dict.sec3;
+      document.getElementById("ui-mun1-label").textContent = dict.mun1Label;
+      document.getElementById("ui-mun2-label").textContent = dict.mun2Label;
+      document.getElementById("ui-mun-total-label").textContent = dict.munTotalLabel;
+
+      // Munitions display
+      const totalMun = state.mun1 + state.mun2;
+      document.getElementById("mun1-sub").textContent = state.mun1 > 0 ? `-${state.mun1}s` : "0s";
+      document.getElementById("mun2-sub").textContent = state.mun2 > 0 ? `-${state.mun2}s` : "0s";
+      document.getElementById("mun-total-val").textContent = totalMun > 0 ? `-${totalMun}s` : "0s";
+
+      // Summary Bar
+      const combatNet = state.atk + state.def;
+      const totalDefGlobal = state.def + state.globalZone;
+
+      document.getElementById("sum-net-title").textContent = dict.sumNetTitle;
+      document.getElementById("sum-net-val").textContent = formatSignedPct(combatNet);
+      document.getElementById("sum-net-sub").textContent = dict.sumNetSub(state.atk, state.def);
+
+      document.getElementById("sum-def-title").textContent = dict.sumDefTitle;
+      document.getElementById("sum-def-val").textContent = formatSignedPct(totalDefGlobal);
+      document.getElementById("sum-def-sub").textContent = dict.sumDefSub(state.def, state.globalZone);
+
+      document.getElementById("sum-mun-title").textContent = dict.sumMunTitle;
+      document.getElementById("sum-mun-val").textContent = totalMun > 0 ? `-${totalMun}s` : "0s";
+
+      // Structures
+      STRUCTURES.forEach(st => {
+        const zoneBonus = state.structZones[st.id];
+        const structNetPct = state.atk + state.def + zoneBonus;
+        const netDec = structNetPct / 100;
+
+        const rawT1 = st.base1 + (st.inc1 * netDec) - totalMun;
+        const t1 = Math.max(2.0, rawT1);
+        const isCap1 = rawT1 <= 2.0001;
+
+        const rawT2 = st.base2 + (st.inc2 * netDec) - totalMun;
+        const t2 = Math.max(10.0, rawT2);
+        const isCap2 = rawT2 <= 10.0001;
+
+        document.getElementById(`name-${st.id}`).textContent = dict.structs[st.key];
+        document.getElementById(`lbl-w1-${st.id}`).textContent = dict.wave1;
+        document.getElementById(`lbl-w2-${st.id}`).textContent = dict.wave2;
+
+        // Zone select options
+        const sel = document.getElementById(`select-zone-${st.id}`);
+        sel.value = String(zoneBonus);
+        Array.from(sel.options).forEach(opt => {
+          opt.textContent = dict.zones[opt.value];
+        });
+
+        // Neto chip
+        const chipEl = document.getElementById(`chip-${st.id}`);
+        const chipInfo = getChipInfo(t1, t2, structNetPct, dict);
+        chipEl.textContent = chipInfo.text;
+        chipEl.className = `neto-chip tabular-nums ${chipInfo.cls}`;
+
+        // Wave 1
+        const cap1El = document.getElementById(`cap1-${st.id}`);
+        cap1El.textContent = dict.cap2;
+        cap1El.style.display = isCap1 ? "inline-block" : "none";
+        document.getElementById(`t1-clock-${st.id}`).textContent = formatClock(t1);
+        document.getElementById(`t1-sec-${st.id}`).textContent = `${t1.toFixed(2).replace(".", ",")}s`;
+
+        // Wave 2
+        const cap2El = document.getElementById(`cap2-${st.id}`);
+        cap2El.textContent = dict.cap10;
+        cap2El.style.display = isCap2 ? "inline-block" : "none";
+        const t2ClockEl = document.getElementById(`t2-clock-${st.id}`);
+        t2ClockEl.textContent = formatClock(t2);
+        if (t2 > 210.0) {
+          t2ClockEl.classList.add("over-limit");
+        } else {
+          t2ClockEl.classList.remove("over-limit");
+        }
+        document.getElementById(`t2-sec-${st.id}`).textContent = `${t2.toFixed(2).replace(".", ",")}s`;
+
+        // Battle Clock & Estimated Waves (210s = 03:30)
+        document.getElementById(`lbl-clock-${st.id}`).textContent = dict.battleClock;
+        document.getElementById(`lbl-waves-${st.id}`).textContent = dict.estWaves;
+
+        const valClockEl = document.getElementById(`val-clock-${st.id}`);
+        const valWavesEl = document.getElementById(`val-waves-${st.id}`);
+
+        if (t1 > 210.0) {
+          valClockEl.textContent = dict.noDeploy1;
+          valClockEl.classList.add("warn");
+          valWavesEl.textContent = dict.waveWord(0);
+          valWavesEl.classList.add("warn");
+        } else {
+          const secondSpawn = t1 + t2;
+          const totalWaves = 1 + Math.floor((210.0 - t1) / t2);
+
+          if (secondSpawn > 210.0) {
+            valClockEl.textContent = dict.outOfTime(formatClock(secondSpawn));
+            valClockEl.classList.add("warn");
+          } else {
+            valClockEl.textContent = formatClock(secondSpawn);
+            valClockEl.classList.remove("warn");
+          }
+
+          valWavesEl.textContent = dict.waveWord(totalWaves);
+          valWavesEl.classList.remove("warn");
+        }
+      });
+
+      renderHelpModal(dict);
+    }
+
+    function initEvents() {
+      const inputAtk = document.getElementById("input-atk");
+      const sliderAtk = document.getElementById("slider-atk");
+      const inputDef = document.getElementById("input-def");
+      const sliderDef = document.getElementById("slider-def");
+
+      inputAtk.addEventListener("input", (e) => {
+        const v = Number(e.target.value) || 0;
+        state.atk = v;
+        sliderAtk.value = Math.min(600, Math.max(0, v));
+        render();
+      });
+
+      sliderAtk.addEventListener("input", (e) => {
+        const v = Number(e.target.value);
+        state.atk = v;
+        inputAtk.value = v;
+        render();
+      });
+
+      inputDef.addEventListener("input", (e) => {
+        const v = Number(e.target.value) || 0;
+        state.def = v;
+        sliderDef.value = Math.min(100, Math.max(-300, v));
+        render();
+      });
+
+      sliderDef.addEventListener("input", (e) => {
+        const v = Number(e.target.value);
+        state.def = v;
+        inputDef.value = v;
+        render();
+      });
+
+      // Global zone buttons
+      document.querySelectorAll("#global-zone-grid .zone-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#global-zone-grid .zone-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const z = Number(btn.dataset.zone);
+          state.globalZone = z;
+          STRUCTURES.forEach(st => {
+            state.structZones[st.id] = z;
+          });
+          render();
+        });
+      });
+
+      // Munition 1 buttons
+      document.querySelectorAll("#mun1-group .mun-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#mun1-group .mun-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.mun1 = Number(btn.dataset.val);
+          render();
+        });
+      });
+
+      // Munition 2 buttons
+      document.querySelectorAll("#mun2-group .mun-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#mun2-group .mun-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.mun2 = Number(btn.dataset.val);
+          render();
+        });
+      });
+
+      // Language buttons
+      document.querySelectorAll(".lang-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".lang-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.lang = btn.dataset.lang;
+          render();
+        });
+      });
+
+      // Help Modal
+      const helpModal = document.getElementById("help-modal");
+      document.getElementById("btn-help").addEventListener("click", () => {
+        helpModal.classList.add("open");
+      });
+      document.getElementById("btn-close-help").addEventListener("click", () => {
+        helpModal.classList.remove("open");
+      });
+      helpModal.addEventListener("click", (e) => {
+        if (e.target === helpModal) {
+          helpModal.classList.remove("open");
+        }
+      });
+
+      // Reset button
+      document.getElementById("btn-reset").addEventListener("click", () => {
+        state.atk = 200;
+        state.def = -100;
+        state.globalZone = 0;
+        state.mun1 = 0;
+        state.mun2 = 0;
+        STRUCTURES.forEach(st => {
+          state.structZones[st.id] = 0;
+        });
+
+        inputAtk.value = 200;
+        sliderAtk.value = 200;
+        inputDef.value = -100;
+        sliderDef.value = -100;
+
+        document.querySelectorAll("#global-zone-grid .zone-btn").forEach(b => {
+          b.classList.toggle("active", b.dataset.zone === "0");
+        });
+        document.querySelectorAll("#mun1-group .mun-btn").forEach(b => {
+          b.classList.toggle("active", b.dataset.val === "0");
+        });
+        document.querySelectorAll("#mun2-group .mun-btn").forEach(b => {
+          b.classList.toggle("active", b.dataset.val === "0");
+        });
+
+        render();
+      });
+    }
+
+    buildStructureCards();
+    initEvents();
+    render();
+  </script>
 </body>
 </html>
